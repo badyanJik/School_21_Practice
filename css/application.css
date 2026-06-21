@@ -1,0 +1,123 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+body{
+    background-color: #2a2a2a;
+    font-family: Montserrat;
+    margin: 0;
+}
+
+.page-wrapper{
+    background-color: #ECECF4;
+    display: flex;
+    flex-direction: column;
+    max-width: 1200px;
+    margin: 0 auto;
+    min-height: 100vh;
+    gap: 20px;
+}
+
+.navigation{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: #1D2733;
+    height: 170px;
+    width: 1200px;
+    margin: 0 auto;
+}
+
+.navigation-top{
+    display: flex; 
+    justify-content: space-around
+}
+
+.logo{
+    height: 124px;
+    width: auto;
+    top: 0;
+}
+
+.header-text{
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.icon{
+    height: 73px;
+    width: 73px;
+    margin: 20px;
+}
+
+.navigation-bottom{
+    display: flex;
+    justify-content: space-around;
+    padding: 20px;
+}
+
+a{
+    text-decoration: none;
+    color: #9A9A9A;
+    font-size: 20px;
+}
+
+.application{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #F5F4F9;
+    width: 804px;
+    height: 948px;
+    border-radius: 20px;
+    padding: 20px;
+    margin: 0 auto;
+    gap: 10px;
+}
+
+.application-main-text{
+    color: black;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.application-button{
+    background-color: #44EB99;
+    color: black;
+    width: 249px;
+    height: 70px;
+    border-radius: 10px;
+    font-family: Montserrat;
+    padding: 10px 20px 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+}
+
+input[type="text"],
+input[type="date"]{
+    width: 432px;
+    height: 60px;
+    border-radius: 10px;
+    font-family: Montserrat;
+    padding: 10px 20px 10px 20px;
+    box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.1);
+    font-size: 14px;
+    border: 2px solid transparent;
+    transition: border-color 0.3s ease;
+}
+
+input[type="text"]:hover,
+input[type="date"]:hover,
+input[type="text"]:focus,
+input[type="date"]:focus {
+    border-color: #8A38F5;  
+    outline: none; 
+}
+
+a:focus{
+    color: white;
+    text-decoration: underline #00AC48;
+    text-decoration-thickness: 3px; 
+    text-underline-offset: 4px;  
+}
