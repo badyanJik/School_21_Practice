@@ -56,7 +56,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    background: linear-gradient(to bottom left, #44EB99, #7E32DA);
+    background: linear-gradient(to bottom left, #FF91F0, #4860EA);
     border-radius: 30px;
     padding: 50px;
     height: auto;
@@ -191,6 +191,77 @@ input[type="email"]:focus {
 a {
     color: white;
     text-decoration: none;
+}
+
+#notification-container {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    width: 90%;
+    max-width: 500px;
+    text-align: center;
+    pointer-events: none;
+}
+
+.notification {
+    background: #333;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    font-family: Montserrat;
+    font-size: 16px;
+    pointer-events: auto;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.notification.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.notification.success {
+    background: #44EB99;
+    color: #1D2733;
+}
+
+.notification.error {
+    background: #ff6b6b;
+    color: white;
+}
+
+.password-requirements {
+    color: #9A9A9A;
+    font-size: 14px;
+    width: 100%;
+    max-width: 432px;
+    margin: -5px 0 5px 0;
+    padding-left: 0;
+}
+
+.password-requirements ul {
+    margin: 4px 0 0 0;
+    padding-left: 20px;
+    list-style-type: disc;
+}
+
+.password-requirements li {
+    margin: 2px 0;
+}
+
+.policy-link {
+    color: #44EB99 !important;
+    text-decoration: underline !important;
+    font-weight: 500;
+}
+
+.policy-link:hover {
+    color: #7E32DA !important;
 }
 
 @media (max-width: 1200px) and (min-width: 769px) {

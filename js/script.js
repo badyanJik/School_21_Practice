@@ -1,8 +1,5 @@
 const API_BASE = 'https://school21test.strangled.net/api';
 
-/**
- * Функция для запросов к API
- */
 async function apiRequest(endpoint, method = 'POST', body = null) {
     try {
         const options = {
@@ -26,9 +23,7 @@ async function apiRequest(endpoint, method = 'POST', body = null) {
     }
 }
 
-/**
- * Регистрация нового пользователя
- */
+//Регистрация нового пользователя
 async function registerUser(email, password, passwordConfirmation) {
     const result = await apiRequest('/register', 'POST', {
         email,
@@ -45,9 +40,8 @@ async function registerUser(email, password, passwordConfirmation) {
     }
 }
 
-/**
- * Авторизация пользователя
- */
+
+//Авторизация пользователя
 async function loginUser(email, password) {
     const result = await apiRequest('/login', 'POST', {
         email,
@@ -62,9 +56,7 @@ async function loginUser(email, password) {
     }
 }
 
-/**
- * Отправка кода подтверждения на почту
- */
+//Отправка кода подтверждения на почту
 async function sendVerificationCode() {
     const result = await apiRequest('/email-verify-code', 'POST');
     if (result.ok) {
@@ -75,9 +67,7 @@ async function sendVerificationCode() {
     }
 }
 
-/**
- * Проверка кода подтверждения
- */
+//Проверка кода подтверждения
 async function verifyEmail(code) {
     const result = await apiRequest('/verify-email', 'POST', { code });
     if (result.ok) {
@@ -89,7 +79,6 @@ async function verifyEmail(code) {
 }
 
 //ВАЛИДАЦИЯ
-
 function validateEmail(email) {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(String(email).toLowerCase());
@@ -104,10 +93,44 @@ function validatePassword(password) {
     return minLength && hasLetters && hasNumbers && hasMixedCase;
 }
 
-//ОБРАБОТЧИКИ СТРАНИЦ
+//Уведомления
+function showNotification(message, type = 'info') {
+    const container = document.getElementById('notification-container');
+    if (!container) return;
+    const el = document.createElement('div');
+    el.className = `notification ${type}`;
+    el.textContent = message;
+    container.appendChild(el);
 
+    requestAnimationFrame(() => {
+        el.classList.add('show');
+    });
+
+    setTimeout(() => {
+        el.classList.remove('show');
+        setTimeout(() => {
+            if (el.parentNode) el.remove();
+        }, 300);
+    }, 3000);
+}
+
+//Защита от брутфорса
+function getLoginAttempts() {
+    return parseInt(sessionStorage.getItem('loginAttempts') || '0', 10);
+}
+
+function incrementLoginAttempts() {
+    const current = getLoginAttempts();
+    sessionStorage.setItem('loginAttempts', String(current + 1));
+}
+
+function resetLoginAttempts() {
+    sessionStorage.removeItem('loginAttempts');
+}
+
+//Обработчики
 document.addEventListener('DOMContentLoaded', function() {
-    //РЕГИСТРАЦИЯ
+    //Регистрация
     const registerForm = document.getElementById('register-form');
     if (registerForm) {
         const emailInput = document.getElementById('reg-email');
@@ -118,58 +141,50 @@ document.addEventListener('DOMContentLoaded', function() {
 
         submitBtn.addEventListener('click', async function(e) {
             e.preventDefault();
-
-            //валидация
             const email = emailInput.value.trim();
             const password = passwordInput.value;
             const passwordConfirm = passwordConfirmInput.value;
 
             if (!email || !validateEmail(email)) {
-                alert('Введите корректный email (например, user@example.com)');
+                showNotification('Введите корректный email (например, user@example.com)', 'error');
                 return;
             }
-
             if (!password || !validatePassword(password)) {
-                alert('Пароль должен содержать минимум 8 символов, буквы (верхний и нижний регистр) и цифры.');
+                showNotification('Пароль должен содержать минимум 8 символов, буквы (верхний и нижний регистр) и цифры.', 'error');
                 return;
             }
-
             if (password !== passwordConfirm) {
-                alert('Пароли не совпадают');
+                showNotification('Пароли не совпадают', 'error');
                 return;
             }
-
             if (!checkbox.checked) {
-                alert('Необходимо согласиться на обработку персональных данных');
+                showNotification('Необходимо согласиться на обработку персональных данных', 'error');
                 return;
             }
 
-            //отправка на сервер
             const result = await registerUser(email, password, passwordConfirm);
             if (result.success) {
-                // сохраняем email для страницы верификации
                 sessionStorage.setItem('registrationEmail', email);
-                // Отправляем код подтверждения сразу после регистрации
                 const codeResult = await sendVerificationCode();
                 if (codeResult.success) {
-                    alert('Регистрация успешна! Код подтверждения отправлен на почту.');
+                    showNotification('Регистрация успешна! Код подтверждения отправлен на почту.', 'success');
                 } else {
-                    alert('Регистрация успешна, но не удалось отправить код. На странице верификации вы сможете запросить его повторно.');
+                    showNotification('Регистрация успешна, но не удалось отправить код. Запросите повторно на странице верификации.', 'error');
                 }
                 window.location.href = 'verification.html';
             } else {
                 if (result.errors && result.errors.email) {
-                    alert(result.errors.email[0]);
+                    showNotification(result.errors.email[0], 'error');
                 } else if (result.errors && result.errors.password) {
-                    alert(result.errors.password[0]);
+                    showNotification(result.errors.password[0], 'error');
                 } else {
-                    alert(result.message);
+                    showNotification(result.message, 'error');
                 }
             }
         });
     }
 
-    //АВТОРИЗАЦИЯ
+    // Авторизация
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
         const emailInput = document.getElementById('login-email');
@@ -182,21 +197,40 @@ document.addEventListener('DOMContentLoaded', function() {
             const email = emailInput.value.trim();
             const password = passwordInput.value;
 
+            //Проверка на брутфорс
+            const attempts = getLoginAttempts();
+            if (attempts >= 5) {
+                showNotification('Слишком много попыток входа. Попробуйте через 30 секунд.', 'error');
+                submitBtn.disabled = true;
+                submitBtn.style.opacity = '0.6';
+                setTimeout(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.style.opacity = '1';
+                    resetLoginAttempts();
+                }, 30000);
+                return;
+            }
+
             if (!email || !validateEmail(email)) {
-                alert('Введите корректный email');
+                showNotification('Введите корректный email', 'error');
                 return;
             }
             if (!password) {
-                alert('Введите пароль');
+                showNotification('Введите пароль', 'error');
                 return;
             }
 
             const result = await loginUser(email, password);
             if (result.success) {
-                alert('Вход выполнен успешно!');
-                // window.location.href = 'dashboard.html'; // пока нет такой страницы
+                resetLoginAttempts();
+                showNotification('Вход выполнен успешно!', 'success');
+                sessionStorage.setItem('userEmail', email);
+                window.location.href = 'application.html';
             } else {
-                alert(result.message);
+                //Очищаем пароль и увеличиваем счётчик попыток
+                passwordInput.value = '';
+                incrementLoginAttempts();
+                showNotification(result.message, 'error');
             }
         });
     }
@@ -207,30 +241,30 @@ document.addEventListener('DOMContentLoaded', function() {
         const codeInput = document.getElementById('code-input');
         const verifyBtn = document.getElementById('verify-btn');
         const resendLink = document.getElementById('resend-code');
-        // Подтверждение кода
+
         verifyBtn.addEventListener('click', async function(e) {
             e.preventDefault();
             const code = codeInput.value.trim();
             if (code.length !== 6 || isNaN(code)) {
-                alert('Введите 6-значный числовой код');
+                showNotification('Введите 6-значный числовой код', 'error');
                 return;
             }
             const result = await verifyEmail(code);
             if (result.success) {
-                alert('Email подтверждён! Теперь вы можете войти.');
+                showNotification('Email подтверждён! Теперь вы можете войти.', 'success');
                 window.location.href = 'authorization.html';
             } else {
-                alert(result.message);
+                showNotification(result.message, 'error');
             }
         });
-        // Повторная отправка кода
+
         resendLink.addEventListener('click', async function(e) {
             e.preventDefault();
             const result = await sendVerificationCode();
             if (result.success) {
-                alert('Код отправлен повторно на вашу почту');
+                showNotification('Код отправлен повторно на вашу почту', 'success');
             } else {
-                alert(result.message);
+                showNotification(result.message, 'error');
             }
         });
     }

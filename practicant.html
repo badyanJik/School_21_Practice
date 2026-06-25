@@ -3,26 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Заявка</title>
+    <title>Личный кабинет практиканта</title>
     <link rel="stylesheet" href="css/application.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap">
 </head>
 <body>
     <div class="page-wrapper">
         <header class="navigation">
-            <div class="navigation-top">
-                <img src="img/logo.png" alt="logo" class="logo">
-                <p class="header-text">Практика</p>
+        <div class="navigation-top">
+            <img src="img/logo.png" alt="logo" class="logo">
+            <p class="header-text">Практика</p>
+            <div class="right-icons">
+                <img src="img/icon 03.png" alt="notification" class="notification-icon" id="profile-notification">
                 <img src="img/Frame 27.png" alt="icon" class="icon" id="profile-icon">
             </div>
+        </div>
             <nav class="navigation-bottom">
-                <a href="#" id="application" class="active">Заявка</a>
-                <a href="#" id="confirmation">Подтверждение</a>
+                <a href="#" id="profile" class="active">Профиль</a>
                 <a href="#" id="practice">Практика</a>
+                <a href="#" id="chat">Чат</a>
             </nav>
         </header>
-
         <div class="application" id="content-container">
+
         </div>
     </div>
 
@@ -39,6 +42,10 @@
     <!-- Контейнер для уведомлений -->
     <div id="notification-container"></div>
 
-    <script src="js/app_script.js"></script>
+    <!-- <div class="notification-bar" >
+        <p class="notification-text">Уведомление</p>
+    </div> -->
+
+    <script src="js/pract_script.js"></script>
 </body>
 </html>
