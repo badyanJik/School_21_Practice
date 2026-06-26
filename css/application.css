@@ -449,3 +449,220 @@ select:focus {
     width: auto;
     cursor: pointer;
 }
+
+.send-notification{
+    background-color: #44EB99;
+    color: #000000;
+    border-radius: 10px;
+    font-family: Montserrat;
+    font-weight: bold;
+    font-size: 12px;
+    border: none;
+    padding: 10px 21px 10px 21px;
+}
+
+.applications-top{
+    display: flex;
+    gap: 10px;
+    justify-content: flex-start;
+}
+
+.applications-top button{
+    background-color: #FFFFFF;
+    color: #000000;
+    border-radius: 10px;
+    border: transparent;
+    font-family: Montserrat;
+    width: 191px;
+    height: 40px;
+    box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.1);
+}
+
+.applications-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: #F5F4F9;
+}
+
+.applications-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 16px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.applications-table tbody tr {
+    background-color: #FFFFFF;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s;
+}
+
+.applications-table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.applications-table td {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 14px;
+    color: #515151;
+    vertical-align: middle;
+}
+
+.applications-table tbody {
+    background-color: #FFFFFF;
+    border-radius: 10px;
+}
+
+.applications-table th:first-child,
+.applications-table td:first-child {
+    padding-left: 20px;
+}
+
+.applications-table th:last-child,
+.applications-table td:last-child {
+    padding-right: 20px;
+}
+
+
+.table-action-btn.accept {
+    background-color: #44EB99;
+    color: #1D2733;
+}
+
+.table-action-btn.reject {
+    background-color: #ff6b6b;
+    color: white;
+}
+
+.popup{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    background-color: #F5F4F9;
+    border-radius: 20px;
+    padding: 40px;
+    height: auto;
+    width: 650px;
+}
+
+.application-popup-info {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;        
+    gap: 12px 30px;        
+    font-size: 16px;
+}
+
+.application-popup-fio{
+    font-weight: bold;
+    font-size: 24px;
+    margin: 0px 0px 0px 0px;
+}
+
+.application-buttons{
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.popup-info-item {
+    display: flex;
+    flex-direction: column;  
+    gap: 4px;                 
+    flex: 0 1 auto;
+    min-width: 100px;        
+}
+
+.popup-label {
+    white-space: nowrap;
+    font-size: 16px;
+}
+
+.popup-value {
+    font-weight: bold;
+    word-break: break-word;
+}
+
+.transparent-button{
+    background-color: transparent;
+    color: #44EB99;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-family: Montserrat;
+    font-weight: bold;
+    padding: 10px 20px 10px 20px;
+}
+
+.application-reject-top{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.template{
+    background-color: #ECECF4;
+    border: none;
+    border-radius: 10px;
+    width: 249px;
+    height: 70px;
+    font-size: 16px;
+    font-family: Montserrat;
+    font-weight: bold;
+    padding: 5px 15px 5px 15px;
+}
+
+.back{
+    height: 35px;
+    width: 15px;
+}
+
+button,
+.application-button,
+.application-button-cancel,
+.application-button-applied,
+.send-notification,
+.applications-top button,
+.table-action-btn,
+.template,
+.transparent-button {
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+    border: 3px solid transparent;
+}
+
+button:hover,
+.application-button:hover,
+.application-button-cancel:hover,
+.application-button-applied:hover,
+.send-notification:hover,
+.applications-top button:hover,
+.table-action-btn:hover,
+.template:hover,
+.transparent-button:hover {
+    border-color: #8A38F5;
+}
+
+button:active,
+.application-button:active,
+.application-button-cancel:active,
+.application-button-applied:active,
+.send-notification:active,
+.applications-top button:active,
+.table-action-btn:active,
+.template:active,
+.transparent-button:active {
+    border-color: #8A38F5;
+    filter: brightness(0.95);
+}
+
+input.full{
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.popup .application-button {
+    align-self: center;
+}
