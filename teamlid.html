@@ -7,115 +7,31 @@
     <link rel="stylesheet" href="css/application.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap">
 </head>
-</head>
 <body>
     <div class="page-wrapper">
         <header class="navigation">
-        <div class="navigation-top">
-            <img src="img/logo.png" alt="logo" class="logo">
-            <p class="header-text">Практика</p>
-            <div class="right-icons">
-                <button class="send-notification">Отправить уведомление</button>
-                <img src="img/Frame 27.png" alt="icon" class="icon" id="profile-icon">
+            <div class="navigation-top">
+                <img src="img/logo.png" alt="logo" class="logo">
+                <p class="header-text">Практика</p>
+                <div class="right-icons">
+                    <button class="send-notification" id="open-notification-popup">Отправить уведомление</button>
+                    <img src="img/Frame 27.png" alt="icon" class="icon" id="profile-icon">
+                </div>
             </div>
-        </div>
             <nav class="navigation-bottom">
-                <a href="#" id="applications" class="active">Заявки</a>
-                <a href="#" id="groups">Группы</a>
-                <a href="#" id="chat">Чат</a>
+                <a href="#" id="applications-tab" class="active">Заявки</a>
+                <a href="#" id="groups-tab">Группы</a>
+                <a href="#" id="chat-tab">Чат</a>
             </nav>
         </header>
-        <div class="application" id="content-container">
-                <!-- Контейнер показа заявок для js -->
-            <div class="applications">
-                <div class="applications-top">
-                    <button >Принято</button>
-                    <button>Отклонено</button>
-                    <button>На рассмотрении</button>
-                </div>
-                <!-- В цикле заполнение данными с сервера в JS -->
-                <table class="applications-table">
-                    <thead>
-                        <tr class="table-header">
-                            <th>ФИО</th>
-                            <th>Курс</th>
-                            <th>Направление</th>
-                            <th>Дата начала</th>
-                            <th>Дата окончания</th>
-                        </tr>
-                    </thead>
-                    <tbody id="table-body">
-                        <!-- Сюда JS будет вставлять строки с данными -->
-                    </tbody>
-                </table>
-                <!-- Попап заявки -->
-                <div class="popup">
-                    <div class="application-popup-fio">
-                        <p>Дуров Павел Валерьевич</p>
-                    </div>
-                    <div class="application-popup-info">
-                    <div class="popup-info-item">
-                            <span class="popup-label">номер телефона</span>
-                            <span class="popup-value" id="popup-phone">+7 999 123-45-67</span>
-                        </div>
-                        <div class="popup-info-item">
-                            <span class="popup-label">дата рождения</span>
-                            <span class="popup-value" id="popup-birthdate">10.10.1984</span>
-                        </div>
-                        <div class="popup-info-item">
-                            <span class="popup-label">курс</span>
-                            <span class="popup-value" id="popup-course">3</span>
-                        </div>
-                        <div class="popup-info-item">
-                            <span class="popup-label">направление</span>
-                            <span class="popup-value" id="popup-specialization">09.03.03</span>
-                        </div>
-                        <div class="popup-info-item">
-                            <span class="popup-label">дата начала</span>
-                            <span class="popup-value" id="popup-start-date">06.07.2026</span>
-                        </div>
-                        <div class="popup-info-item">
-                            <span class="popup-label">дата окончания</span>
-                            <span class="popup-value" id="popup-end-date">02.08.2026</span>
-                        </div>
-                    </div>
-                    <div class="application-buttons">
-                        <button class="application-button">Принять</button>
-                        <button class="application-button-cancel">Отклонить</button>
-                    </div>
-                </div>
-                <!-- Попап Причина отказа -->
-                <div class="popup">
-                    <div class="application-reject-top">
-                        <img src="img/Frame 50.png" alt="back" class="back">
-                        <button class="template">Шаблоны</button>
-                    </div>
-                    <p class="application-main-text">Укажите причину отказа</p>
-                    <input type="text" placeholder="Текст" class="full">
-                    <div class="application-buttons">
-                        <button class="transparent-button">Сохранить шаблон</button>
-                        <button class="application-button">Отправить</button>
-                    </div>
-                </div>
-                <!-- Попап Шаблончек -->
-                 <div class="popup">
-                    <img src="img/Frame 50.png" alt="back" class="back">
-                    <div class="popup-info-item">
-                        <p>Название шаблона</p>
-                        <input type="text" placeholder="Текст" class="full">
-                    </div>
-                    <div class="popup-info-item">
-                        <p>Причина отказа</p>
-                        <input type="text" placeholder="Поле обязательно для ввода" class="full">
-                    </div>
-                    <button class="application-button">Сохранить</button>
-                 </div>
-            </div>
+
+        <!-- Контейнер для динамического контента -->
+        <div class="application-big" id="content-container">
+            <!-- Сюда JS будет рендерить всё -->
         </div>
     </div>
 
-
-    <!-- Попап профиля -->
+    <!-- Попап профиля (остаётся статическим, т.к. он общий) -->
     <div class="profile">
         <div class="profile-header">
             <img src="img/Frame 13.png" alt="profile" class="profile-icon">
@@ -128,8 +44,6 @@
     <!-- Контейнер для уведомлений -->
     <div id="notification-container"></div>
 
-
-
-    <script src="js/teamlid_script.js"></script>    
+    <script src="js/teamlid_script.js"></script>
 </body>
 </html>
