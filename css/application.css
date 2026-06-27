@@ -10,7 +10,7 @@ body{
     background-color: #ECECF4;
     display: flex;
     flex-direction: column;
-    max-width: 1200px;
+    max-width: 1500px;
     margin: 0 auto;
     min-height: 100vh;
     gap: 20px;
@@ -22,7 +22,7 @@ body{
     justify-content: space-between;
     background-color: #1D2733;
     height: 170px;
-    width: 1200px;
+    width: 1500px;
     margin: 0 auto;
 }
 
@@ -75,6 +75,21 @@ a{
     align-items: center;
     background-color: #F5F4F9;
     width: 804px;
+    height: auto;
+    border-radius: 20px;
+    padding: 20px;
+    margin: 0 auto;
+    margin-bottom: 20px;
+    gap: 10px;
+}
+
+.application-big{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    /* align-items: center; */
+    background-color: #F5F4F9;
+    width: 1216px;
     height: auto;
     border-radius: 20px;
     padding: 20px;
@@ -538,16 +553,69 @@ select:focus {
     color: white;
 }
 
-.popup{
-    display: flex;
+/* ===== Попапы (общее) ===== */
+.popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
     flex-direction: column;
     gap: 20px;
     background-color: #F5F4F9;
     border-radius: 20px;
     padding: 40px;
     height: auto;
-    width: 650px;
+    width: auto;              /* вместо 650px */
+    min-width: 300px;         /* чтобы не сжимался слишком сильно */
+    max-width: 90vw;          /* не вылезает за экран */
+    box-sizing: border-box;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    max-height: 90vh;
+    overflow-y: auto;         /* вертикальный скролл при необходимости */
+    overflow-x: hidden;       /* горизонтальный скролл отключён */
 }
+
+.popup .applications-table {
+    width: 100%;
+    min-width: 0;
+    table-layout: fixed;
+}
+.popup .applications-table th,
+.popup .applications-table td {
+    word-break: break-word;
+    white-space: normal;
+}
+
+/* Затемнение */
+#popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 999;
+    display: none;
+}
+
+/* Кнопка закрытия попапа (крестик) */
+.popup .popup-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #999;
+    cursor: pointer;
+}
+
+.popup .popup-close:hover {
+    color: #1D2733;
+}
+
 
 .application-popup-info {
     display: flex;
@@ -665,4 +733,105 @@ input.full{
 
 .popup .application-button {
     align-self: center;
+}
+
+.groups-active{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    /* justify-content: center; */
+    flex-wrap: wrap;
+    white-space: nowrap;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.group{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #FFFFFF;
+    border-radius: 20px;
+    gap: 10px;
+    /* padding: 40px; */
+    height: 180px;
+    width: 274px;
+    box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.1);
+}
+
+.applications-group-top-popup{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.group-info {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.group-info-date{
+    font-size: 32px;
+    font-weight: bold;
+}
+
+.group-info-count{
+    font-size: 24px;
+}
+
+.group-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* ===== Dropdown для групп ===== */
+.dropdown {
+    width: 100%;                     /* занимает всю ширину родителя */
+    margin-bottom: 10px;
+}
+
+.dropbtn {
+    background-color: #ECECF4;
+    border: none;
+    border-radius: 10px;
+    padding: 15px 20px;
+    font-size: 20px;
+    font-weight: bold;
+    font-family: Montserrat;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.3s;
+}
+
+.dropbtn:hover {
+    background-color: #d5d5d5;
+}
+
+.dropbtn .arrow {
+    transition: transform 0.3s ease;
+    font-size: 24px;
+}
+
+.dropdown.open .dropbtn .arrow {
+    transform: rotate(180deg);
+}
+
+.dropdown-content {
+    display: none;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 15px;
+    padding: 10px 0;
+    transition: all 0.3s ease;
+}
+
+.dropdown.open .dropdown-content {
+    display: flex;
 }
