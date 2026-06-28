@@ -835,3 +835,181 @@ input.full{
 .dropdown.open .dropdown-content {
     display: flex;
 }
+
+.chat {
+    display: flex;
+    gap: 20px;
+    background-color: #ECECF4; /* фон для всей области чата */
+    width: 100%;
+    border-radius: 20px;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.chat-left {
+    flex: 0 0 289px; /* фиксированная ширина */
+    height: 725px;
+    background-color: #F5F4F9;
+    border-radius: 20px;
+    padding: 20px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+}
+
+.chat-left-user{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #FFFFFF;
+    color: #000000;
+    size: 15px;
+    border-radius: 10px;
+    padding: 10px 15px 10px 15px;
+    box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.1);
+    border: 3px solid transparent;
+    transition: border-color 0.2s ease;
+    cursor: pointer;
+}
+
+.chat-left-user-icon{
+    width: 50px;
+    height: 50px;
+}
+
+.chat-right {
+    flex: 1; /* занимает всё оставшееся место */
+    display: flex;
+    flex-direction: column;
+    height: 725px;
+    background-color: #F5F4F9;
+    border-radius: 20px;
+    padding: 20px 15px;
+    overflow-y: auto;
+    gap: 10px;
+}
+
+.chat-right-message {
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff;
+    border-radius: 20px;
+    padding: 15px 20px;
+    line-height: 1.5;
+    font-size: 16px;
+    max-width: 80%;        /* чтобы не растягивались на всю ширину */
+    word-wrap: break-word; /* перенос длинных слов */
+    /* white-space: pre-wrap; сохраняет переносы строк */
+    align-self: flex-start; /* прижимаем к левому краю */
+}
+
+.chat-right-message-teamlid{
+    color: #7E32DA;
+    font-weight: bold;
+}
+
+.chat-right-message-username{
+    color: #008E48;
+    font-weight: bold;
+}
+
+.chat-input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: auto; /* прижимаем к низу */
+    width: 100%;
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 5px 10px;
+    box-sizing: border-box;
+}
+
+.chat-input input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 12px 15px;
+    font-family: Montserrat;
+    font-size: 16px;
+    background: transparent;
+    box-shadow: none;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box
+}
+
+.chat-input img {
+    width: 45px;
+    height: 45px;
+    border: 3px solid transparent;
+    border-radius: 50%;
+    transition: border-color 0.2s ease;
+    cursor: pointer;
+    padding: 2px;
+    background: transparent;
+    box-sizing: border-box;
+}
+
+.chat-input img:hover {
+    background: #f0f0f0;
+}
+
+.page-wrapper,
+.application-big,
+.chat,
+.chat-left,
+.chat-right {
+    overflow-x: hidden;
+}
+
+.chat-left-user:hover,
+.chat-left-user:active {
+    border-color: #8A38F5;
+    /* Фон и размер не меняются */
+}
+
+.chat-input img:hover,
+.chat-input img:active {
+    border-color: #8A38F5;
+    /* Фон и размер не меняются */
+}
+
+/* ===== Кнопки в левой панели чата ===== */
+.chat-left .btn-sm {
+    background-color: #FFFFFF;
+    color: #000000;
+    border: 3px solid transparent;
+    border-radius: 10px;
+    font-family: Montserrat;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 8px 0;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+    flex: 1;
+    text-align: center;
+    box-shadow: 2px 2px 2px rgba(0,0,0,0.05);
+}
+
+.chat-left .btn-sm.active {
+    background-color: #8A38F5;
+    color: #FFFFFF;
+    border-color: #8A38F5;
+}
+
+.chat-left .btn-sm:hover,
+.chat-left .btn-sm:active {
+    border-color: #8A38F5;
+}
+
+/* ===== Контейнер сообщений в чате ===== */
+#chat-messages-area {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+}
