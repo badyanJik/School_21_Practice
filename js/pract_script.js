@@ -1,4 +1,11 @@
+// ============================================================
+// 1. Базовый URL API
+// ============================================================
 const API_BASE = 'https://school21test.strangled.net/api';
+
+// ============================================================
+// 2. Вспомогательные функции
+// ============================================================
 
 async function apiRequest(endpoint, method = 'POST', body = null) {
     try {
@@ -22,7 +29,7 @@ async function apiRequest(endpoint, method = 'POST', body = null) {
 }
 
 async function getRequests() {
-    const result = await apiRequest('/requests', 'GET');
+    const result = await apiRequest('/requests/my', 'GET');
     if (result.ok) {
         return { success: true, data: result.data.practice_requests || [] };
     } else {
@@ -36,6 +43,7 @@ function getStatusText(statusCode) {
         'pending': 'На рассмотрении',
         'accepted': 'Одобрена',
         'rejected': 'Отклонена',
+        'canceled': 'Отменена',
     };
     return map[statusCode] || statusCode;
 }
@@ -53,16 +61,10 @@ function showNotification(message, type = 'info') {
     el.className = `notification ${type}`;
     el.textContent = message;
     container.appendChild(el);
-
-    requestAnimationFrame(() => {
-        el.classList.add('show');
-    });
-
+    requestAnimationFrame(() => el.classList.add('show'));
     setTimeout(() => {
         el.classList.remove('show');
-        setTimeout(() => {
-            if (el.parentNode) el.remove();
-        }, 300);
+        setTimeout(() => { if (el.parentNode) el.remove(); }, 300);
     }, 3000);
 }
 
@@ -70,6 +72,146 @@ async function logoutUser() {
     const result = await apiRequest('/logout', 'POST');
     return result.ok;
 }
+
+// ============================================================
+// 3. Управление попапом уведомлений
+// ============================================================
+
+let notificationOverlay = null;
+
+function openNotificationPopup() {
+    const popup = document.querySelector('.notification-popup');
+    if (!popup) return;
+    popup.style.display = 'flex';
+
+    if (!notificationOverlay) {
+        notificationOverlay = document.createElement('div');
+        notificationOverlay.id = 'notification-overlay';
+        notificationOverlay.style.position = 'fixed';
+        notificationOverlay.style.top = '0';
+        notificationOverlay.style.left = '0';
+        notificationOverlay.style.width = '100%';
+        notificationOverlay.style.height = '100%';
+        notificationOverlay.style.background = 'rgba(0,0,0,0.5)';
+        notificationOverlay.style.zIndex = '999';
+        notificationOverlay.style.display = 'none';
+        document.body.appendChild(notificationOverlay);
+        notificationOverlay.addEventListener('click', closeNotificationPopup);
+    }
+    notificationOverlay.style.display = 'block';
+
+    renderNotifications();
+}
+
+function closeNotificationPopup() {
+    const popup = document.querySelector('.notification-popup');
+    if (popup) popup.style.display = 'none';
+    if (notificationOverlay) notificationOverlay.style.display = 'none';
+}
+
+// ============================================================
+// 4. Тестовые данные уведомлений
+// ============================================================
+
+let notificationsData = [
+    {
+        id: 1,
+        theme: 'Собрание практикантов',
+        date: '22.07.2026 17:49',
+        title: 'Собрание практикантов',
+        description: 'Уважаемые практиканты! <br> Доводим до вашего сведения, что 22.07 в 19:00 состоится общее организационное собрание. <br> Явка на собрание строго обязательна для всех без исключения. На встрече будут озвучены важные вопросы, касающиеся вашей работы и дальнейшего графика. <br> Просим вас быть вовремя. Опоздания не допускаются.',
+        read: false
+    },
+    {
+        id: 2,
+        theme: 'Изменение расписания',
+        date: '20.07.2026 10:15',
+        title: 'Изменение расписания',
+        description: 'Уважаемые практиканты! <br> В связи с техническими работами расписание на следующую неделю изменено. Новое расписание будет опубликовано на сайте. <br> Приносим извинения за неудобства.',
+        read: true
+    },
+    {
+        id: 3,
+        theme: 'Важная информация о практике',
+        date: '18.07.2026 09:00',
+        title: 'Важная информация о практике',
+        description: 'Коллеги! <br> Напоминаем, что все практиканты должны заполнить анкеты до 25 июля. Анкеты доступны в личном кабинете. <br> С уважением, администрация.',
+        read: false
+    }
+];
+
+let currentNotificationId = null;
+
+function updateNotificationIcon() {
+    const icon = document.getElementById('profile-notification');
+    if (!icon) return;
+    const hasUnread = notificationsData.some(notif => !notif.read);
+    icon.src = hasUnread ? 'img/icon 04.png' : 'img/icon 03.png';
+}
+
+function renderNotifications() {
+    const leftContainer = document.querySelector('.notification-left');
+    const rightContainer = document.querySelector('.notification-right');
+    if (!leftContainer || !rightContainer) return;
+
+    leftContainer.innerHTML = '';
+    notificationsData.forEach(notif => {
+        const item = document.createElement('div');
+        item.className = `notification-item${notif.read ? '' : ' unread'}`;
+        item.dataset.id = notif.id;
+        item.innerHTML = `
+            <span class="notification-message">${notif.theme}</span>
+            ${notif.read ? '' : '<span class="notification-dot"></span>'}
+        `;
+        item.addEventListener('click', function() {
+            selectNotification(notif.id);
+        });
+        leftContainer.appendChild(item);
+    });
+
+    if (notificationsData.length > 0) {
+        selectNotification(notificationsData[0].id);
+    } else {
+        rightContainer.innerHTML = '<p>Нет уведомлений</p>';
+    }
+
+    updateNotificationIcon();
+}
+
+function selectNotification(id) {
+    const notif = notificationsData.find(n => n.id === id);
+    if (!notif) return;
+    currentNotificationId = id;
+    const rightContainer = document.querySelector('.notification-right');
+    if (!rightContainer) return;
+
+    if (!notif.read) {
+        notif.read = true;
+        const items = document.querySelectorAll('.notification-item');
+        items.forEach(item => {
+            if (parseInt(item.dataset.id) === id) {
+                item.classList.remove('unread');
+                const dot = item.querySelector('.notification-dot');
+                if (dot) dot.remove();
+            }
+        });
+        updateNotificationIcon();
+    }
+
+    rightContainer.innerHTML = `
+        <div class="notification-right-header">
+            <span class="notification-theme-label">Тема</span>
+            <span class="notification-date">${notif.date}</span>
+        </div>
+        <div class="notification-title-block">${notif.title}</div>
+        <span class="notification-description-label">Описание</span>
+        <div class="notification-description-block">${notif.description}</div>
+    `;
+}
+
+// ============================================================
+// 5. Основная логика страницы (вкладки, заявки)
+// ============================================================
 
 document.addEventListener('DOMContentLoaded', async function() {
     const profileLink = document.getElementById('profile');
@@ -79,7 +221,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     let currentRequest = null;
 
-    // ---- Загрузка заявки ----
     async function loadRequests() {
         const result = await getRequests();
         if (result.success) {
@@ -170,12 +311,32 @@ document.addEventListener('DOMContentLoaded', async function() {
                         <span class="chat-right-message-text">Привет</span>
                     </div>
                     <div class="chat-input">
-                        <input type="text" placeholder="Введите текст">
+                        <input type="text" placeholder="Введите текст" id="chat-input-field">
                         <img src="img/Frame 50.png" alt="send" id="send-message-btn">
                     </div>
                 </div>
             </div>
         `;
+        const sendBtn = document.getElementById('send-message-btn');
+        const inputField = document.getElementById('chat-input-field');
+        if (sendBtn) {
+            sendBtn.addEventListener('click', function() {
+                const text = inputField ? inputField.value.trim() : '';
+                if (text) {
+                    showNotification('Сообщение отправлено: ' + text, 'success');
+                    inputField.value = '';
+                } else {
+                    showNotification('Введите текст сообщения', 'error');
+                }
+            });
+        }
+        if (inputField) {
+            inputField.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendBtn.click();
+                }
+            });
+        }
     }
 
     function switchToTab(tabName) {
@@ -186,11 +347,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (activeLink) activeLink.classList.add('active');
 
         const container = document.getElementById('content-container');
-        // Меняем фон в зависимости от вкладки
         if (tabName === 'chat') {
             container.style.backgroundColor = '#ECECF4';
         } else {
-            container.style.backgroundColor = ''; // вернуть стандартный (F5F4F9)
+            container.style.backgroundColor = '';
         }
 
         switch (tabName) {
@@ -215,57 +375,60 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     await loadRequests();
     switchToTab('profile');
-});
+    updateNotificationIcon(); // Устанавливаем иконку при загрузке
 
+    const notifIcon = document.getElementById('profile-notification');
+    if (notifIcon) {
+        notifIcon.addEventListener('click', function(e) {
+            e.stopPropagation();
+            openNotificationPopup();
+        });
+    }
 
-//Попап
-document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeNotificationPopup();
+        }
+    });
+
     const profileIcon = document.getElementById('profile-icon');
     const profilePopup = document.querySelector('.profile');
     const logoutBtn = document.querySelector('.logout-button');
     const profileEmail = document.querySelector('.profile-email');
 
-    if (!profileIcon || !profilePopup) return;
+    if (profileIcon && profilePopup) {
+        const userEmail = sessionStorage.getItem('userEmail') || sessionStorage.getItem('registrationEmail') || 'user@example.com';
+        if (profileEmail) profileEmail.textContent = userEmail;
 
-    const userEmail = sessionStorage.getItem('userEmail') || sessionStorage.getItem('registrationEmail');
-    if (userEmail && profileEmail) {
-        profileEmail.textContent = userEmail;
-    } else {
-        profileEmail.textContent = 'user@example.com';
-    }
-
-    profileIcon.addEventListener('click', function(e) {
-        e.stopPropagation();
-        const isVisible = profilePopup.classList.contains('show');
-        if (isVisible) {
-            profilePopup.classList.remove('show');
-        } else {
-            const rect = profileIcon.getBoundingClientRect();
-            profilePopup.style.top = (rect.bottom + 8) + 'px';
-            profilePopup.style.left = (rect.right - 280) + 'px';
-            profilePopup.classList.add('show');
-        }
-    });
-
-    document.addEventListener('click', function(e) {
-        if (!profilePopup.contains(e.target) && e.target !== profileIcon) {
-            profilePopup.classList.remove('show');
-        }
-    });
-
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', async function() {
-            const confirmLogout = confirm('Вы уверены, что хотите выйти?');
-            if (!confirmLogout) return;
-
-            const result = await logoutUser();
-            if (result) {
-                sessionStorage.removeItem('userEmail');
-                sessionStorage.removeItem('registrationEmail');
-                window.location.href = 'authorization.html';
-            } else {
-                showNotification('Не удалось выйти из системы. Попробуйте позже.', 'error');
+        profileIcon.addEventListener('click', function(e) {
+            e.stopPropagation();
+            profilePopup.classList.toggle('show');
+            if (profilePopup.classList.contains('show')) {
+                const rect = profileIcon.getBoundingClientRect();
+                profilePopup.style.top = (rect.bottom + 8) + 'px';
+                profilePopup.style.left = (rect.right - 280) + 'px';
             }
         });
+
+        document.addEventListener('click', function(e) {
+            if (!profilePopup.contains(e.target) && e.target !== profileIcon) {
+                profilePopup.classList.remove('show');
+            }
+        });
+
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', async function() {
+                if (confirm('Вы уверены, что хотите выйти?')) {
+                    const result = await logoutUser();
+                    if (result) {
+                        sessionStorage.removeItem('userEmail');
+                        sessionStorage.removeItem('registrationEmail');
+                        window.location.href = 'authorization.html';
+                    } else {
+                        showNotification('Не удалось выйти из системы. Попробуйте позже.', 'error');
+                    }
+                }
+            });
+        }
     }
 });
