@@ -23,7 +23,6 @@ function openPopup(id) {
     const popup = document.getElementById(id);
     if (!popup) return;
 
-    // Принудительное центрирование попапа поверх всего
     popup.style.position = 'fixed';
     popup.style.top = '50%';
     popup.style.left = '50%';
@@ -31,7 +30,6 @@ function openPopup(id) {
     popup.style.zIndex = '1000';
     popup.style.display = 'flex';
 
-    // Создаём затемнение, если его нет
     let overlay = document.getElementById('popup-overlay');
     if (!overlay) {
         overlay = document.createElement('div');
@@ -49,7 +47,6 @@ function openPopup(id) {
     }
     overlay.style.display = 'block';
 
-    // Закрываем другие открытые попапы
     document.querySelectorAll('.popup').forEach(p => {
         if (p.id !== id && p.style.display !== 'none') {
             p.style.display = 'none';
@@ -151,8 +148,93 @@ function renderGroupsTab() {
     `;
 }
 
+// ---- Функции для рендеринга контента чата ----
+function renderChatMessages(chatId = 'default') {
+    const messages = {
+        default: `
+            <div class="chat-right-message">
+                <span class="chat-right-message-teamlid">Тимлид</span>
+                <span class="chat-right-message-text">Приветствую на практике! <br>
+                                                    Ну что, вы на месте, заявка одобрена — и это отличные новости! Я рад, что вы с нами. <br>
+                                                    Немного обо мне: я тимлид, буду вашим главным проводником в ближайшие несколько недель. Моя задача — не просто давать задачи, а помочь вам разобраться, влиться в процессы и получить максимум пользы от этой практики. Здесь нет глупых вопросов, есть только те, на которые ещё никто не ответил. Так что спрашивате смело — я на связи.</span>
+            </div>
+            <div class="chat-right-message">
+                <span class="chat-right-message-username">Иванов И. И.</span>
+                <span class="chat-right-message-text">Всем привет!</span>
+            </div>
+            <div class="chat-right-message">
+                <span class="chat-right-message-username">Дуров П. В.</span>
+                <span class="chat-right-message-text">Привет</span>
+            </div>
+        `,
+        group1: `
+            <div class="chat-right-message">
+                <span class="chat-right-message-teamlid">Тимлид</span>
+                <span class="chat-right-message-text">Привет, группа 22.06-14.07!</span>
+            </div>
+            <div class="chat-right-message">
+                <span class="chat-right-message-username">Студент 1</span>
+                <span class="chat-right-message-text">Здравствуйте!</span>
+            </div>
+        `,
+        group2: `
+            <div class="chat-right-message">
+                <span class="chat-right-message-teamlid">Тимлид</span>
+                <span class="chat-right-message-text">Привет, группа 01.07-15.07!</span>
+            </div>
+            <div class="chat-right-message">
+                <span class="chat-right-message-username">Студент А</span>
+                <span class="chat-right-message-text">Привет!</span>
+            </div>
+        `
+    };
+    return messages[chatId] || messages.default;
+}
+
+function renderMembersList() {
+    return `
+        <div class="chat-right-message" style="background:#fff; width:100%;">
+            <span class="chat-right-message-username">Список участников:</span>
+            <ul style="list-style:none; padding:0; margin-top:10px;">
+                <li>Корытко Е. А.</li>
+                <li>Иванов И. И.</li>
+                <li>Петров П. П.</li>
+                <li>Сидоров С. С.</li>
+            </ul>
+        </div>
+    `;
+}
+
 function renderChatTab() {
-    return `<div class="center-content"><p>Чат пока не реализован</p></div>`;
+    return `
+        <div class="chat">
+            <div class="chat-left">
+                <div class="applications-top" style="width:100%;">
+                    <button class="btn btn-sm chat-tab-btn active" data-tab="groups">Группы</button>
+                    <button class="btn btn-sm chat-tab-btn" data-tab="members">Участники</button>
+                </div>
+                <div class="chat-left-user" data-chat="default">
+                    <img src="img/Rectangle 32.png" alt="icon" class="chat-left-user-icon">
+                    <span>22.06-14.07</span>
+                </div>
+                <div class="chat-left-user" data-chat="group1">
+                    <img src="img/Rectangle 32.png" alt="icon" class="chat-left-user-icon">
+                    <span>22.06-14.07 (группа)</span>
+                </div>
+                <div class="chat-left-user" data-chat="group2">
+                    <img src="img/Rectangle 32.png" alt="icon" class="chat-left-user-icon">
+                    <span>01.07-15.07</span>
+                </div>
+            </div>
+            <div class="chat-right" id="chat-right-content">
+                <div id="chat-messages-area"></div>
+                <div class="chat-input">
+                    <input type="text" placeholder="Введите текст" id="chat-input-field">
+                    <img src="img/Frame 50.png" alt="send" id="send-message-btn">
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 // ============================================================
@@ -302,13 +384,13 @@ function createPopups() {
             </div>
         </div>
     `;
-    // Вставляем попапы в body
     const wrapper = document.createElement('div');
     wrapper.innerHTML = popupsHTML;
     while (wrapper.firstChild) {
         document.body.appendChild(wrapper.firstChild);
     }
 }
+
 // ============================================================
 // 5. Основная логика (рендеринг вкладок, обработчики)
 // ============================================================
@@ -327,19 +409,23 @@ function renderTab(tabName) {
         html = renderChatTab();
     }
     container.innerHTML = html;
-    // После рендеринга привязываем обработчики событий
     attachEventHandlers(tabName);
 }
 
 function switchTab(tabName) {
     currentTab = tabName;
-    // Активный класс для навигации
     document.querySelectorAll('.navigation-bottom a').forEach(link => link.classList.remove('active'));
     const activeLink = document.getElementById(tabName + '-tab');
     if (activeLink) activeLink.classList.add('active');
-    // Рендерим контент
+
+    const container = document.getElementById('content-container');
+    if (tabName === 'chat') {
+        container.style.backgroundColor = '#ECECF4';
+    } else {
+        container.style.backgroundColor = '';
+    }
+
     renderTab(tabName);
-    // Закрываем все попапы
     closeAllPopups();
 }
 
@@ -348,8 +434,8 @@ function switchTab(tabName) {
 // ============================================================
 
 function attachEventHandlers(tabName) {
+    // Обработчики для вкладки "Заявки"
     if (tabName === 'applications') {
-        // Клик по строке таблицы -> открыть попап заявки
         document.querySelectorAll('.request-row').forEach(row => {
             row.addEventListener('click', function() {
                 const fio = this.querySelector('td:first-child').textContent;
@@ -358,7 +444,6 @@ function attachEventHandlers(tabName) {
             });
         });
 
-        // Фильтры (заглушка)
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 const filter = this.getAttribute('data-filter');
@@ -367,8 +452,8 @@ function attachEventHandlers(tabName) {
         });
     }
 
+    // Обработчики для вкладки "Группы"
     if (tabName === 'groups') {
-        // Клик по группе -> открыть детали
         document.querySelectorAll('.group').forEach(group => {
             group.addEventListener('click', function(e) {
                 if (e.target.closest('button')) return;
@@ -380,7 +465,6 @@ function attachEventHandlers(tabName) {
             });
         });
 
-        // Раскрытие dropdown
         document.querySelectorAll('.dropbtn').forEach(btn => {
             btn.addEventListener('click', function(e) {
                 e.stopPropagation();
@@ -389,18 +473,15 @@ function attachEventHandlers(tabName) {
             });
         });
 
-        // Фильтрация групп
         const filterButtons = document.querySelectorAll('.group-filter-btn');
         const allGroups = document.querySelectorAll('.group');
         const dropdowns = document.querySelectorAll('.dropdown');
 
         function filterGroups(type) {
-            // Сначала показываем все группы и dropdown-ы
             allGroups.forEach(g => g.style.display = 'flex');
             dropdowns.forEach(d => d.style.display = 'block');
 
             if (type === 'active') {
-                // Скрываем все группы с data-type="finished" и все dropdown-ы
                 allGroups.forEach(g => {
                     if (g.getAttribute('data-type') === 'finished') {
                         g.style.display = 'none';
@@ -412,17 +493,15 @@ function attachEventHandlers(tabName) {
                     }
                 });
             } else if (type === 'finished') {
-                // Скрываем все группы с data-type="active"
                 allGroups.forEach(g => {
                     if (g.getAttribute('data-type') === 'active') {
                         g.style.display = 'none';
                     }
                 });
-                // Показываем все dropdown-ы (они уже видны)
+                // dropdowns оставляем видимыми
             }
         }
 
-        // По умолчанию показываем только активные
         filterGroups('active');
 
         filterButtons.forEach(btn => {
@@ -434,8 +513,75 @@ function attachEventHandlers(tabName) {
         });
     }
 
-    // Для всех вкладок – общие обработчики для кнопок внутри контента (если есть)
-    // Например, кнопка "Отправить уведомление" в шапке уже обрабатывается отдельно.
+    // Обработчики для вкладки "Чат"
+    if (tabName === 'chat') {
+        const tabBtns = document.querySelectorAll('.chat-tab-btn');
+        const messagesArea = document.getElementById('chat-messages-area');
+        const sendBtn = document.getElementById('send-message-btn');
+        const inputField = document.getElementById('chat-input-field');
+
+        // Функция рендеринга содержимого (сообщения или участники)
+        function renderChatContent(tab) {
+            if (tab === 'members') {
+                messagesArea.innerHTML = renderMembersList();
+            } else {
+                messagesArea.innerHTML = renderChatMessages('default');
+            }
+        }
+
+        // Устанавливаем начальное состояние (по умолчанию активна "Группы")
+        renderChatContent('groups');
+
+        // Переключение между вкладками "Группы" и "Участники"
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                const tab = this.dataset.tab;
+                renderChatContent(tab);
+                showNotification('Переключено на ' + (tab === 'groups' ? 'Группы' : 'Участников'), 'info');
+            });
+        });
+
+        // Обработка кликов по элементам слева (чаты) – НЕ сбрасываем активную вкладку
+        document.querySelectorAll('.chat-left-user').forEach(user => {
+            user.addEventListener('click', function() {
+                const chatId = this.dataset.chat || 'default';
+                // Если активна вкладка "Участники", при клике на чат оставляем её активной,
+                // но показываем сообщения (или можно оставить список участников? но по логике, лучше показывать сообщения)
+                // Чтобы не менять вкладку, мы просто обновляем messagesArea.
+                // Но если активна "Участники", мы можем либо переключить на "Группы", либо оставить, как есть.
+                // Я оставлю без переключения – просто обновим сообщения.
+                messagesArea.innerHTML = renderChatMessages(chatId);
+                // Если активна вкладка "Участники", можно дополнительно переключить её на "Группы", но мы не будем.
+                // Если хотите, чтобы при клике на чат автоматически переключалось на "Группы", раскомментируйте:
+                // if (document.querySelector('.chat-tab-btn.active').dataset.tab === 'members') {
+                //     tabBtns.forEach(b => b.classList.remove('active'));
+                //     document.querySelector('.chat-tab-btn[data-tab="groups"]').classList.add('active');
+                // }
+            });
+        });
+
+        // Обработчик кнопки отправки сообщения (заглушка)
+        if (sendBtn) {
+            sendBtn.addEventListener('click', function() {
+                const text = inputField ? inputField.value.trim() : '';
+                if (text) {
+                    showNotification('Сообщение отправлено: ' + text, 'success');
+                    inputField.value = '';
+                } else {
+                    showNotification('Введите текст сообщения', 'error');
+                }
+            });
+        }
+        if (inputField) {
+            inputField.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendBtn.click();
+                }
+            });
+        }
+    }
 }
 
 // ============================================================
@@ -443,10 +589,8 @@ function attachEventHandlers(tabName) {
 // ============================================================
 
 document.addEventListener('DOMContentLoaded', function() {
-    // 1. Создаём попапы (один раз)
     createPopups();
 
-    // 2. Обработчики для вкладок
     document.getElementById('applications-tab').addEventListener('click', function(e) {
         e.preventDefault();
         switchTab('applications');
@@ -460,20 +604,17 @@ document.addEventListener('DOMContentLoaded', function() {
         switchTab('chat');
     });
 
-    // 3. Обработчики для кнопок в попапах (привязываем один раз, т.к. попапы существуют всегда)
-    // Кнопка "Отклонить" в попапе заявки
+    // Обработчики для кнопок в попапах
     document.getElementById('popup-request-reject')?.addEventListener('click', function() {
         closePopup('popup-request');
         openPopup('popup-reject-reason');
     });
 
-    // Кнопка "Принять" в попапе заявки
     document.getElementById('popup-request-accept')?.addEventListener('click', function() {
         showNotification('Заявка принята! (заглушка)', 'success');
         closePopup('popup-request');
     });
 
-    // Открытие попапа "Шаблоны" из разных мест
     document.getElementById('open-template-popup')?.addEventListener('click', function() {
         openPopup('popup-template');
     });
@@ -487,7 +628,6 @@ document.addEventListener('DOMContentLoaded', function() {
         openPopup('popup-template');
     });
 
-    // Сохранение шаблона
     document.getElementById('template-save')?.addEventListener('click', function() {
         const name = document.getElementById('template-name').value.trim();
         const reason = document.getElementById('template-reason').value.trim();
@@ -499,7 +639,6 @@ document.addEventListener('DOMContentLoaded', function() {
         closePopup('popup-template');
     });
 
-    // Отправка причины отказа
     document.getElementById('reject-submit')?.addEventListener('click', function() {
         const reason = document.getElementById('reject-reason-input').value.trim();
         if (!reason) {
@@ -510,17 +649,14 @@ document.addEventListener('DOMContentLoaded', function() {
         closePopup('popup-reject-reason');
     });
 
-    // Открытие попапа уведомления из шапки
     document.getElementById('open-notification-popup')?.addEventListener('click', function() {
         openPopup('popup-notification');
     });
 
-    // Открытие попапа уведомления из деталей группы
     document.getElementById('open-notification-from-group')?.addEventListener('click', function() {
         openPopup('popup-notification');
     });
 
-    // Отправка уведомления
     document.getElementById('notification-send')?.addEventListener('click', function() {
         const subject = document.getElementById('notification-subject').value.trim();
         const body = document.getElementById('notification-body').value.trim();
@@ -533,7 +669,6 @@ document.addEventListener('DOMContentLoaded', function() {
         closePopup('popup-notification');
     });
 
-    // Закрытие попапов по кнопкам .popup-close
     document.querySelectorAll('.popup-close').forEach(btn => {
         btn.addEventListener('click', function(e) {
             const targetId = this.getAttribute('data-close');
@@ -546,7 +681,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // 4. Попап профиля (копируем из других скриптов)
+    // Попап профиля
     const profileIcon = document.getElementById('profile-icon');
     const profilePopup = document.querySelector('.profile');
     const logoutBtn = document.querySelector('.logout-button');
@@ -583,6 +718,5 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // 5. Загружаем вкладку по умолчанию
     switchTab('applications');
 });

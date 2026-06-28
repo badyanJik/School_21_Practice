@@ -143,22 +143,56 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     function renderChatTab() {
         container.innerHTML = `
-            <div class="confirmation-content center-content">
-                <p>Чат группы будет доступен после начала практики.</p>
+            <div class="chat">
+                <div class="chat-left">
+                    <div class="chat-left-user">
+                        <img src="img/Rectangle 32.png" alt="icon" class="chat-left-user-icon">
+                        <span>Тимлид</span>
+                    </div>
+                    <div class="chat-left-user">
+                        <img src="img/Rectangle 32.png" alt="icon" class="chat-left-user-icon">
+                        <span>Общая</span>
+                    </div>
+                </div>
+                <div class="chat-right">
+                    <div class="chat-right-message">
+                        <span class="chat-right-message-teamlid">Тимлид</span>
+                        <span class="chat-right-message-text">Приветствую на практике! <br>
+                                                            Ну что, вы на месте, заявка одобрена — и это отличные новости! Я рад, что вы с нами. <br>
+                                                            Немного обо мне: я тимлид, буду вашим главным проводником в ближайшие несколько недель. Моя задача — не просто давать задачи, а помочь вам разобраться, влиться в процессы и получить максимум пользы от этой практики. Здесь нет глупых вопросов, есть только те, на которые ещё никто не ответил. Так что спрашивате смело — я на связи.</span>
+                    </div>
+                    <div class="chat-right-message">
+                        <span class="chat-right-message-username">Иванов И. И.</span>
+                        <span class="chat-right-message-text">Всем привет!</span>
+                    </div>
+                    <div class="chat-right-message">
+                        <span class="chat-right-message-username">Дуров П. В.</span>
+                        <span class="chat-right-message-text">Привет</span>
+                    </div>
+                    <div class="chat-input">
+                        <input type="text" placeholder="Введите текст">
+                        <img src="img/Frame 50.png" alt="send" id="send-message-btn">
+                    </div>
+                </div>
             </div>
         `;
     }
 
     function switchToTab(tabName) {
-
         document.querySelectorAll('.navigation-bottom a').forEach(link => {
             link.classList.remove('active');
         });
-
         const activeLink = document.getElementById(tabName);
-        if (activeLink) {
-            activeLink.classList.add('active');
+        if (activeLink) activeLink.classList.add('active');
+
+        const container = document.getElementById('content-container');
+        // Меняем фон в зависимости от вкладки
+        if (tabName === 'chat') {
+            container.style.backgroundColor = '#ECECF4';
+        } else {
+            container.style.backgroundColor = ''; // вернуть стандартный (F5F4F9)
         }
+
         switch (tabName) {
             case 'profile': renderProfileTab(); break;
             case 'practice': renderPracticeTab(); break;
