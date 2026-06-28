@@ -24,37 +24,20 @@
                 <a href="#" id="chat">Чат</a>
             </nav>
         </header>
+        <!-- Контейнер для динамического контента (вкладки) -->
         <div class="application-big" id="content-container">
-            <div class="chat">
-                <div class="chat-left">
-                    <div class="chat-left-user">
-                        <img src="img/Rectangle 32.png" alt="icon" class="chat-left-user-icon">
-                        <span>Тимлид</span>
-                    </div>
-                    <div class="chat-left-user">
-                        <img src="img/Rectangle 32.png" alt="icon" class="chat-left-user-icon">
-                        <span>Общая</span>
-                    </div>
+            <!-- Сюда JS будет рендерить содержимое вкладок -->
+        </div>
+
+        <!-- Попап уведомлений (теперь вне content-container) -->
+        <div class="popup notification-popup">
+            <span class="application-main-text">Уведомление</span>
+            <div class="notification-container">
+                <div class="notification-left">
+                    <!-- Сюда JS вставит список уведомлений -->
                 </div>
-                <div class="chat-right">
-                    <div class="chat-right-message">
-                        <span class="chat-right-message-teamlid">Тимлид</span>
-                        <span class="chat-right-message-text">Приветствую на практике! <br>
-                                                            Ну что, вы на месте, заявка одобрена — и это отличные новости! Я рад, что вы с нами. <br>
-                                                            Немного обо мне: я тимлид, буду вашим главным проводником в ближайшие несколько недель. Моя задача — не просто давать задачи, а помочь вам разобраться, влиться в процессы и получить максимум пользы от этой практики. Здесь нет глупых вопросов, есть только те, на которые ещё никто не ответил. Так что спрашивате смело — я на связи.</span>
-                    </div>
-                    <div class="chat-right-message">
-                        <span class="chat-right-message-username">Иванов И. И.</span>
-                        <span class="chat-right-message-text">Всем привет!</span>
-                    </div>
-                    <div class="chat-right-message">
-                        <span class="chat-right-message-username">Дуров П. В.</span>
-                        <span class="chat-right-message-text">Привет</span>
-                    </div>
-                    <div class="chat-input">
-                        <input type="text" placeholder="Введите текст">
-                        <img src="img/Frame 50.png" alt="send">
-                    </div>
+                <div class="notification-right">
+                    <!-- Сюда JS вставит детали выбранного уведомления -->
                 </div>
             </div>
         </div>
