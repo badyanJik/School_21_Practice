@@ -1,13 +1,35 @@
 const API_BASE = 'https://school21test.strangled.net/api';
 
-async function apiRequest(endpoint, method = 'POST', body = null) {
+function getAuthToken() {
+    return sessionStorage.getItem('auth_token') || localStorage.getItem('auth_token') || null;
+}
+
+function setAuthToken(token) {
+    sessionStorage.setItem('auth_token', token);
+    // localStorage.setItem('auth_token', token);
+}
+
+function removeAuthToken() {
+    sessionStorage.removeItem('auth_token');
+    localStorage.removeItem('auth_token');
+}
+
+async function apiRequest(endpoint, method = 'POST', body = null, requireAuth = false) {
     try {
+        const headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        };
+
+        const token = getAuthToken();
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
         const options = {
             method,
             credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers,
         };
 
         if (body) {
@@ -16,6 +38,13 @@ async function apiRequest(endpoint, method = 'POST', body = null) {
 
         const response = await fetch(`${API_BASE}${endpoint}`, options);
         const data = await response.json().catch(() => null);
+
+        //Если токен недействителен, удаляем и перенаправляем на логин
+        if (response.status === 401 && !window.location.pathname.includes('authorization.html')) {
+            removeAuthToken();
+            window.location.href = 'authorization.html';
+        }
+
         return { ok: response.ok, status: response.status, data };
     } catch (error) {
         console.error('Network error:', error);
@@ -23,7 +52,7 @@ async function apiRequest(endpoint, method = 'POST', body = null) {
     }
 }
 
-//Регистрация нового пользователя
+//АУТЕНТИФИКАЦИЯ
 async function registerUser(email, password, passwordConfirmation) {
     const result = await apiRequest('/register', 'POST', {
         email,
@@ -32,7 +61,10 @@ async function registerUser(email, password, passwordConfirmation) {
     });
 
     if (result.ok) {
-        return { success: true };
+        if (result.data && result.data.auth_token) {
+            setAuthToken(result.data.auth_token);
+        }
+        return { success: true, auth_token: result.data?.auth_token };
     } else {
         const message = result.data?.message || 'Ошибка регистрации';
         const errors = result.data?.errors || {};
@@ -40,8 +72,6 @@ async function registerUser(email, password, passwordConfirmation) {
     }
 }
 
-
-//Авторизация пользователя
 async function loginUser(email, password) {
     const result = await apiRequest('/login', 'POST', {
         email,
@@ -49,16 +79,29 @@ async function loginUser(email, password) {
     });
 
     if (result.ok) {
-        return { success: true };
+        if (result.data && result.data.auth_token) {
+            setAuthToken(result.data.auth_token);
+        }
+        return { success: true, auth_token: result.data?.auth_token };
     } else {
         const message = result.data?.message || 'Ошибка входа';
         return { success: false, message };
     }
 }
 
-//Отправка кода подтверждения на почту
+//Получение роли текущего пользователя
+async function getUserRole() {
+    const result = await apiRequest('/users/me', 'GET', null, true);
+    if (result.ok) {
+        return { success: true, role: result.data?.role };
+    } else {
+        const message = result.data?.message || 'Ошибка получения роли';
+        return { success: false, message };
+    }
+}
+
 async function sendVerificationCode() {
-    const result = await apiRequest('/email-verify-code', 'POST');
+    const result = await apiRequest('/email-verify-code', 'POST', null, true);
     if (result.ok) {
         return { success: true };
     } else {
@@ -67,9 +110,8 @@ async function sendVerificationCode() {
     }
 }
 
-//Проверка кода подтверждения
 async function verifyEmail(code) {
-    const result = await apiRequest('/verify-email', 'POST', { code });
+    const result = await apiRequest('/verify-email', 'POST', { code }, true);
     if (result.ok) {
         return { success: true };
     } else {
@@ -85,7 +127,6 @@ function validateEmail(email) {
 }
 
 function validatePassword(password) {
-    //минимум 8 символов, буквы, цифры, верхний и нижний регистр
     const minLength = password.length >= 8;
     const hasLetters = /[a-zA-Z]/.test(password);
     const hasNumbers = /\d/.test(password);
@@ -93,7 +134,7 @@ function validatePassword(password) {
     return minLength && hasLetters && hasNumbers && hasMixedCase;
 }
 
-//Уведомления
+//УВЕДОМЛЕНИЯ
 function showNotification(message, type = 'info') {
     const container = document.getElementById('notification-container');
     if (!container) return;
@@ -114,7 +155,7 @@ function showNotification(message, type = 'info') {
     }, 3000);
 }
 
-//Защита от брутфорса
+//ЗАЩИТА ОТ БРУТФОРСА
 function getLoginAttempts() {
     return parseInt(sessionStorage.getItem('loginAttempts') || '0', 10);
 }
@@ -128,9 +169,10 @@ function resetLoginAttempts() {
     sessionStorage.removeItem('loginAttempts');
 }
 
-//Обработчики
+//ОБРАБОТЧИКИ
 document.addEventListener('DOMContentLoaded', function() {
-    //Регистрация
+
+    //РЕГИСТРАЦИЯ
     const registerForm = document.getElementById('register-form');
     if (registerForm) {
         const emailInput = document.getElementById('reg-email');
@@ -184,7 +226,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Авторизация
+    //АВТОРИЗАЦИЯ
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
         const emailInput = document.getElementById('login-email');
@@ -197,7 +239,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const email = emailInput.value.trim();
             const password = passwordInput.value;
 
-            //Проверка на брутфорс
+            //Брутфорс-защита
             const attempts = getLoginAttempts();
             if (attempts >= 5) {
                 showNotification('Слишком много попыток входа. Попробуйте через 30 секунд.', 'error');
@@ -223,11 +265,27 @@ document.addEventListener('DOMContentLoaded', function() {
             const result = await loginUser(email, password);
             if (result.success) {
                 resetLoginAttempts();
-                showNotification('Вход выполнен успешно!', 'success');
                 sessionStorage.setItem('userEmail', email);
-                window.location.href = 'application.html';
+
+                //Получаем роль пользователя
+                const roleResult = await getUserRole();
+                if (roleResult.success) {
+                    const role = roleResult.role;
+                    sessionStorage.setItem('userRole', role);
+
+                    //Перенаправление в зависимости от роли
+                    if (role === 'teamlead') {
+                        window.location.href = 'teamlid.html';
+                    } else {
+                        //student-на страницу заявок
+                        window.location.href = 'application.html';
+                    }
+                } else {
+                    //Если не удалось получить роль, но токен есть — пробуем перейти на application.html
+                    showNotification('Не удалось определить роль, перенаправляем на страницу заявок.', 'error');
+                    window.location.href = 'application.html';
+                }
             } else {
-                //Очищаем пароль и увеличиваем счётчик попыток
                 passwordInput.value = '';
                 incrementLoginAttempts();
                 showNotification(result.message, 'error');
@@ -249,10 +307,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 showNotification('Введите 6-значный числовой код', 'error');
                 return;
             }
+
             const result = await verifyEmail(code);
             if (result.success) {
-                showNotification('Email подтверждён! Теперь вы можете войти.', 'success');
-                window.location.href = 'authorization.html';
+                showNotification('Email подтверждён!', 'success');
+                //После верификации пробуем получить роль и перенаправить
+                const roleResult = await getUserRole();
+                if (roleResult.success) {
+                    const role = roleResult.role;
+                    sessionStorage.setItem('userRole', role);
+                    if (role === 'teamlead') {
+                        window.location.href = 'teamlid.html';
+                    } else {
+                        window.location.href = 'application.html';
+                    }
+                } else {
+                    //Если не удалось получить роль, но токен есть — на application.html
+                    window.location.href = 'application.html';
+                }
             } else {
                 showNotification(result.message, 'error');
             }

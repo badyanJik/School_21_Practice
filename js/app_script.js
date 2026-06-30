@@ -1,19 +1,50 @@
 const API_BASE = 'https://school21test.strangled.net/api';
 
+function getAuthToken() {
+    return sessionStorage.getItem('auth_token') || localStorage.getItem('auth_token') || null;
+}
+
+function setAuthToken(token) {
+    sessionStorage.setItem('auth_token', token);
+    // localStorage.setItem('auth_token', token);
+}
+
+function removeAuthToken() {
+    sessionStorage.removeItem('auth_token');
+    localStorage.removeItem('auth_token');
+}
+
 async function apiRequest(endpoint, method = 'POST', body = null) {
     try {
+        const token = getAuthToken();
+        const headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        };
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
         const options = {
             method,
             credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers,
         };
         if (body) {
             options.body = JSON.stringify(body);
         }
+
         const response = await fetch(`${API_BASE}${endpoint}`, options);
         const data = await response.json().catch(() => null);
+
+        // Если токен недействителен, удаляем и перенаправляем на логин
+        if (response.status === 401) {
+            removeAuthToken();
+            if (!window.location.pathname.includes('authorization.html')) {
+                window.location.href = 'authorization.html';
+            }
+        }
+
         return { ok: response.ok, status: response.status, data };
     } catch (error) {
         console.error('Network error:', error);
@@ -42,8 +73,10 @@ async function createRequest(requestData) {
     }
 }
 
-async function updateRequestStatus(id, newStatus) {
-    const result = await apiRequest(`/requests/${id}/status`, 'PATCH', { new_status: newStatus });
+async function updateRequestStatus(id, newStatus, reason = null) {
+    const body = { new_status: newStatus };
+    if (reason) body.reason = reason;
+    const result = await apiRequest(`/requests/${id}/status`, 'PATCH', body);
     if (result.ok) {
         return { success: true, data: result.data.practice_request };
     } else {
@@ -83,7 +116,7 @@ function formatDate(dateStr) {
     return `${parts[2]}.${parts[1]}.${parts[0]}`;
 }
 
-//Уведомления
+//УВЕДОМЛЕНИЯ
 function showNotification(message, type = 'info') {
     const container = document.getElementById('notification-container');
     if (!container) return;
@@ -104,7 +137,26 @@ function showNotification(message, type = 'info') {
     }, 3000);
 }
 
+//ВЫХОД ИЗ СИСТЕМЫ
+async function logoutUser() {
+    const result = await apiRequest('/logout', 'POST');
+    if (result.ok) {
+        removeAuthToken();
+    }
+    return result.ok;
+}
+
+//ОСНОВНАЯ ЛОГИКА СТРАНИЦЫ
 document.addEventListener('DOMContentLoaded', async function() {
+    //Если нет токена и мы не на странице авторизации-редирект
+    if (!window.location.pathname.includes('authorization.html')) {
+        const token = getAuthToken();
+        if (!token) {
+            window.location.href = 'authorization.html';
+            return;
+        }
+    }
+
     const appLink = document.getElementById('application');
     const confLink = document.getElementById('confirmation');
     const practLink = document.getElementById('practice');
@@ -152,7 +204,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 
                 <label class="form-label">Город</label>
                 <select id="app-city" class="form-select">
-                    <option value="">Выберите город</option>
                     <option value="Москва">Москва</option>
                     <option value="Санкт-Петербург">Санкт-Петербург</option>
                     <option value="Казань">Казань</option>
@@ -363,13 +414,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
 });
 
-//Выход из системы
-async function logoutUser() {
-    const result = await apiRequest('/logout', 'POST');
-    return result.ok;
-}
-
-//Попап профиля
+//ПОПАП ПРОФИЛЯ
 document.addEventListener('DOMContentLoaded', function() {
     const profileIcon = document.getElementById('profile-icon');
     const profilePopup = document.querySelector('.profile');
@@ -378,12 +423,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (!profileIcon || !profilePopup) return;
 
-    const userEmail = sessionStorage.getItem('userEmail') || sessionStorage.getItem('registrationEmail');
-    if (userEmail && profileEmail) {
-        profileEmail.textContent = userEmail;
-    } else {
-        profileEmail.textContent = 'user@example.com';
-    }
+    const userEmail = sessionStorage.getItem('userEmail') || sessionStorage.getItem('registrationEmail') || 'user@example.com';
+    if (profileEmail) profileEmail.textContent = userEmail;
 
     profileIcon.addEventListener('click', function(e) {
         e.stopPropagation();
@@ -411,6 +452,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const result = await logoutUser();
             if (result) {
+                removeAuthToken();
                 sessionStorage.removeItem('userEmail');
                 sessionStorage.removeItem('registrationEmail');
                 window.location.href = 'authorization.html';

@@ -1,26 +1,49 @@
-// ============================================================
-// 1. Базовый URL API
-// ============================================================
 const API_BASE = 'https://school21test.strangled.net/api';
 
-// ============================================================
-// 2. Вспомогательные функции
-// ============================================================
+function getAuthToken() {
+    return sessionStorage.getItem('auth_token') || localStorage.getItem('auth_token') || null;
+}
+
+function setAuthToken(token) {
+    sessionStorage.setItem('auth_token', token);
+}
+
+function removeAuthToken() {
+    sessionStorage.removeItem('auth_token');
+    localStorage.removeItem('auth_token');
+}
 
 async function apiRequest(endpoint, method = 'POST', body = null) {
     try {
+        const token = getAuthToken();
+        const headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        };
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
         const options = {
             method,
             credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers,
         };
         if (body) {
             options.body = JSON.stringify(body);
         }
+
         const response = await fetch(`${API_BASE}${endpoint}`, options);
         const data = await response.json().catch(() => null);
+
+        // Если токен недействителен, удаляем и перенаправляем на логин
+        if (response.status === 401) {
+            removeAuthToken();
+            if (!window.location.pathname.includes('authorization.html')) {
+                window.location.href = 'authorization.html';
+            }
+        }
+
         return { ok: response.ok, status: response.status, data };
     } catch (error) {
         console.error('Network error:', error);
@@ -70,12 +93,13 @@ function showNotification(message, type = 'info') {
 
 async function logoutUser() {
     const result = await apiRequest('/logout', 'POST');
+    if (result.ok) {
+        removeAuthToken();
+        sessionStorage.removeItem('userEmail');
+        sessionStorage.removeItem('registrationEmail');
+    }
     return result.ok;
 }
-
-// ============================================================
-// 3. Управление попапом уведомлений
-// ============================================================
 
 let notificationOverlay = null;
 
@@ -108,10 +132,6 @@ function closeNotificationPopup() {
     if (popup) popup.style.display = 'none';
     if (notificationOverlay) notificationOverlay.style.display = 'none';
 }
-
-// ============================================================
-// 4. Тестовые данные уведомлений
-// ============================================================
 
 let notificationsData = [
     {
@@ -209,11 +229,16 @@ function selectNotification(id) {
     `;
 }
 
-// ============================================================
-// 5. Основная логика страницы (вкладки, заявки)
-// ============================================================
-
 document.addEventListener('DOMContentLoaded', async function() {
+    //Проверка токена
+    if (!window.location.pathname.includes('authorization.html')) {
+        const token = getAuthToken();
+        if (!token) {
+            window.location.href = 'authorization.html';
+            return;
+        }
+    }
+
     const profileLink = document.getElementById('profile');
     const practiceLink = document.getElementById('practice');
     const chatLink = document.getElementById('chat');
@@ -375,7 +400,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     await loadRequests();
     switchToTab('profile');
-    updateNotificationIcon(); // Устанавливаем иконку при загрузке
+    updateNotificationIcon();
 
     const notifIcon = document.getElementById('profile-notification');
     if (notifIcon) {
@@ -391,6 +416,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     });
 
+    //Попап профиля
     const profileIcon = document.getElementById('profile-icon');
     const profilePopup = document.querySelector('.profile');
     const logoutBtn = document.querySelector('.logout-button');
@@ -421,8 +447,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 if (confirm('Вы уверены, что хотите выйти?')) {
                     const result = await logoutUser();
                     if (result) {
-                        sessionStorage.removeItem('userEmail');
-                        sessionStorage.removeItem('registrationEmail');
+                        //Токен и данные уже удалены внутри logoutUser
                         window.location.href = 'authorization.html';
                     } else {
                         showNotification('Не удалось выйти из системы. Попробуйте позже.', 'error');
